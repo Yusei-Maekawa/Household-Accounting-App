@@ -1,0 +1,109 @@
+@startuml
+title 家計簿アプリ データベース設計（ER図）
+
+!define PRIMARY_KEY(x) <b><color:#b8861b><&key></color> x</b>
+!define FOREIGN_KEY(x) <color:#aaaaaa><&key></color> x
+!define COLUMN(x) <color:#efefef><&media-record></color> x
+!define TABLE(x) entity x << (T, white) >>
+
+TABLE(users) {
+  PRIMARY_KEY(id) : SERIAL
+  --
+  COLUMN(username) : VARCHAR(50) NOT NULL UNIQUE
+  COLUMN(email) : VARCHAR(100) NOT NULL UNIQUE
+  COLUMN(password_hash) : VARCHAR(255) NOT NULL
+  COLUMN(first_name) : VARCHAR(50)
+  COLUMN(last_name) : VARCHAR(50)
+  COLUMN(currency) : VARCHAR(3) DEFAULT 'JPY'
+  COLUMN(timezone) : VARCHAR(50) DEFAULT 'Asia/Tokyo'
+  COLUMN(is_active) : BOOLEAN DEFAULT true
+  COLUMN(created_at) : TIMESTAMP DEFAULT NOW()
+  COLUMN(updated_at) : TIMESTAMP DEFAULT NOW()
+}
+
+TABLE(categories) {
+  PRIMARY_KEY(id) : SERIAL
+  --
+  COLUMN(name) : VARCHAR(50) NOT NULL
+  COLUMN(type) : category_type NOT NULL
+  COLUMN(color) : VARCHAR(7) DEFAULT '#007bff'
+  COLUMN(icon) : VARCHAR(50) DEFAULT 'default'
+  COLUMN(is_default) : BOOLEAN DEFAULT false
+  COLUMN(sort_order) : INTEGER DEFAULT 0
+  FOREIGN_KEY(user_id) : INTEGER NOT NULL
+  COLUMN(created_at) : TIMESTAMP DEFAULT NOW()
+}
+
+TABLE(transactions) {
+  PRIMARY_KEY(id) : SERIAL
+  --
+  COLUMN(amount) : DECIMAL(12,2) NOT NULL
+  COLUMN(description) : TEXT
+  COLUMN(transaction_date) : DATE NOT NULL
+  COLUMN(type) : transaction_type NOT NULL
+  COLUMN(receipt_image_url) : VARCHAR(255)
+  COLUMN(location) : VARCHAR(100)
+  COLUMN(tags) : VARCHAR(255)
+  FOREIGN_KEY(category_id) : INTEGER NOT NULL
+  FOREIGN_KEY(user_id) : INTEGER NOT NULL
+  FOREIGN_KEY(family_group_id) : INTEGER
+  COLUMN(created_at) : TIMESTAMP DEFAULT NOW()
+  COLUMN(updated_at) : TIMESTAMP DEFAULT NOW()
+}
+
+TABLE(budgets) {
+  PRIMARY_KEY(id) : SERIAL
+  --
+  COLUMN(amount) : DECIMAL(12,2) NOT NULL
+  COLUMN(period_type) : budget_period DEFAULT 'monthly'
+  COLUMN(year) : INTEGER NOT NULL
+  COLUMN(month) : INTEGER
+  COLUMN(quarter) : INTEGER
+  COLUMN(is_active) : BOOLEAN DEFAULT true
+  FOREIGN_KEY(category_id) : INTEGER NOT NULL
+  FOREIGN_KEY(user_id) : INTEGER NOT NULL
+  COLUMN(created_at) : TIMESTAMP DEFAULT NOW()
+  COLUMN(updated_at) : TIMESTAMP DEFAULT NOW()
+}
+
+TABLE(family_groups) {
+  PRIMARY_KEY(id) : SERIAL
+  --
+  COLUMN(name) : VARCHAR(100) NOT NULL
+  COLUMN(description) : TEXT
+  COLUMN(invite_code) : VARCHAR(20) UNIQUE
+  COLUMN(is_active) : BOOLEAN DEFAULT true
+  FOREIGN_KEY(owner_id) : INTEGER NOT NULL
+  COLUMN(created_at) : TIMESTAMP DEFAULT NOW()
+}
+
+TABLE(family_members) {
+  PRIMARY_KEY(id) : SERIAL
+  --
+  FOREIGN_KEY(user_id) : INTEGER NOT NULL
+  FOREIGN_KEY(family_group_id) : INTEGER NOT NULL
+  COLUMN(role) : member_role DEFAULT 'member'
+  COLUMN(permissions) : TEXT[]
+  COLUMN(joined_at) : TIMESTAMP DEFAULT NOW()
+}
+
+' リレーションシップ
+users ||--o{ categories : "owns"
+users ||--o{ transactions : "creates"
+users ||--o{ budgets : "sets"
+users ||--o{ family_members : "belongs to"
+users ||--o{ family_groups : "owns"
+
+categories ||--o{ transactions : "categorizes"
+categories ||--o{ budgets : "limits"
+
+family_groups ||--o{ family_members : "contains"
+family_groups ||--o{ transactions : "shares"
+
+note right of users : ユーザーマスタ
+note right of categories : カテゴリマスタ
+note right of transactions : 取引データ
+note right of budgets : 予算設定
+note right of family_groups : 家族グループ
+
+@enduml
