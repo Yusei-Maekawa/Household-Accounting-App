@@ -1,0 +1,145 @@
+@startuml
+title 家計簿PWAアプリ システムアーキテクチャ
+
+package "Client Layer (PWA)" {
+  component [React PWA] as frontend
+  component [Service Worker] as sw
+  component [Web App Manifest] as manifest
+  
+  note right of frontend
+    - React 18 + PWA機能
+    - オフライン対応
+    - インストール可能
+    - プッシュ通知
+    - カメラAPI
+  end note
+}
+
+package "Application Layer" {
+  component [Django REST API] as backend
+  component [Celery] as celery
+  component [Tesseract OCR] as ocr
+  
+  note right of backend
+    - Django REST Framework
+    - JWT認証
+    - CORS対応
+    - API Documentation
+  end note
+  
+  note right of celery
+    - 非同期タスク処理
+    - レシートOCR処理
+    - バックグラウンド同期
+  end note
+}
+
+package "Data Layer" {
+  database [PostgreSQL] as postgres
+  database [Redis] as redis
+  
+  note right of postgres
+    - メインデータベース
+    - トランザクション管理
+    - 家族データ分離
+  end note
+  
+  note right of redis
+    - セッション管理
+    - キャッシュ
+    - Celeryブローカー
+  end note
+}
+
+package "Storage Layer" {
+  component [Local File Storage] as storage
+  
+  note right of storage
+    - レシート画像保存
+    - プロフィール画像
+    - 一時ファイル
+  end note
+}
+
+package "Email Service" {
+  component [Django Email Backend] as email
+  
+  note right of email
+    - 招待メール送信
+    - パスワードリセット
+    - 通知メール
+  end note
+}
+
+package "Development Environment" {
+  component [Docker Compose] as docker
+  component [VS Code] as vscode
+  component [GitHub] as github
+  
+  note right of docker
+    - 開発環境統一
+    - PostgreSQL + Redis
+    - ホットリロード
+  end note
+}
+
+package "Hosting (無料)" {
+  cloud [Vercel] as vercel_host
+  cloud [Railway] as railway_host
+  cloud [Supabase] as supabase_db
+  
+  note right of vercel_host
+    - PWA最適化ホスティング
+    - 自動HTTPS
+    - CDN付き
+    - カスタムドメイン
+  end note
+  
+  note right of railway_host
+    - Django + Celery
+    - PostgreSQL + Redis付き
+    - 月500時間無料
+    - 自動デプロイ
+  end note
+  
+  note right of supabase_db
+    - PostgreSQL無料プラン
+    - 500MB ストレージ
+    - REST API自動生成
+    - リアルタイム機能
+  end note
+}
+
+' PWA関連の接続
+frontend --> sw : Register
+frontend --> manifest : Install
+sw --> frontend : Cache Management
+
+' API関連の接続
+frontend --> backend : HTTPS/REST API
+backend --> postgres : SQL
+backend --> redis : Cache/Session
+backend --> storage : File Upload
+backend --> email : SMTP
+backend --> ocr : Image Processing
+celery --> redis : Message Broker
+celery --> ocr : Background Tasks
+
+' 開発環境
+docker --> backend : Development
+docker --> postgres : Local DB
+docker --> redis : Local Cache
+github --> vscode : Source Control
+
+' デプロイ関連
+vercel_host --> frontend : PWA Deploy
+railway_host --> backend : API Deploy
+railway_host --> celery : Worker Deploy
+supabase_db --> postgres : Hosted DB
+
+' PWA特有の機能フロー
+frontend ..> storage : Offline Cache
+sw ..> backend : Background Sync
+manifest ..> frontend : App Install
+
+@enduml
