@@ -1,0 +1,62 @@
+@startuml
+title 家計簿アプリ 無料版システムアーキテクチャ
+
+package "Client Layer" {
+  component [React/Next.js PWA] as frontend
+}
+
+package "Application Layer" {
+  component [Django REST API] as backend
+  component [Celery] as celery
+  component [Tesseract OCR] as ocr
+}
+
+package "Data Layer" {
+  database [PostgreSQL] as postgres
+  database [Redis] as redis
+}
+
+package "Storage Layer" {
+  component [Local File Storage] as storage
+}
+
+package "Email Service" {
+  component [Django Email Backend] as email
+}
+
+package "Hosting (無料)" {
+  cloud [Vercel] as vercel_host
+  cloud [Railway] as railway_host
+  cloud [Supabase] as supabase_db
+}
+
+frontend --> backend : HTTPS
+backend --> postgres : SQL
+backend --> redis : Cache
+backend --> storage : File Upload
+backend --> email : SMTP
+backend --> ocr : Image Processing
+
+vercel_host --> frontend : Deploy
+railway_host --> backend : Deploy
+supabase_db --> postgres : Hosted DB
+
+note right of vercel_host
+  - フロントエンド無料ホスティング
+  - 独自ドメイン対応
+  - CDN付き
+end note
+
+note right of railway_host
+  - バックエンド無料ホスティング
+  - PostgreSQL + Redis付き
+  - 月500時間まで無料
+end note
+
+note right of supabase_db
+  - PostgreSQL 無料プラン
+  - 500MB ストレージ
+  - REST API自動生成
+end note
+
+@enduml
