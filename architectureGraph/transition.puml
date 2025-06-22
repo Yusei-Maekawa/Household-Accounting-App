@@ -1,0 +1,87 @@
+@startuml
+title 家計簿アプリ 画面遷移図
+
+[*] --> Splash
+Splash --> Login : アプリ起動
+Login --> SignUp : 新規登録
+SignUp --> Login : 登録完了
+Login --> Home : ログイン成功
+
+' ホーム画面からの遷移
+Home --> MonthlySummary : 月次サマリー表示
+Home --> AddExpense : 支出追加
+Home --> Graph : グラフ確認
+Home --> CalendarView : カレンダー形式表示
+Home --> ReceiptOCR : レシート読み取り
+Home --> Settings : 各種設定
+Home --> ExpenseList : 支出一覧
+Home --> IncomeManagement : 収入管理
+
+' 支出関連の画面遷移
+AddExpense --> CategorySelection : カテゴリ選択
+AddExpense --> Home : 保存完了
+CategorySelection --> AddExpense : カテゴリ決定
+ExpenseList --> EditExpense : 支出編集
+EditExpense --> ExpenseList : 編集完了
+ExpenseList --> DeleteConfirm : 削除確認
+DeleteConfirm --> ExpenseList : 削除完了/キャンセル
+
+' 収入管理の画面遷移
+IncomeManagement --> AddIncome : 収入追加
+AddIncome --> IncomeManagement : 保存完了
+IncomeManagement --> EditIncome : 収入編集
+EditIncome --> IncomeManagement : 編集完了
+
+' 月次サマリーの画面遷移
+MonthlySummary --> GoalSetting : 月ごとの目標設定
+MonthlySummary --> DetailedReport : 詳細レポート
+GoalSetting --> MonthlySummary : 目標設定完了
+DetailedReport --> MonthlySummary : 戻る
+
+' グラフ画面の画面遷移
+Graph --> GraphSettings : グラフ設定
+GraphSettings --> Graph : 設定完了
+Graph --> ExportData : データ出力
+ExportData --> Graph : 出力完了
+
+' カレンダー画面の画面遷移
+CalendarView --> DayDetail : 日別詳細
+DayDetail --> CalendarView : 戻る
+DayDetail --> EditExpense : 支出編集
+
+' レシート読み取りの画面遷移
+ReceiptOCR --> OCRResult : 読み取り結果
+OCRResult --> AddExpense : 結果確認
+OCRResult --> ReceiptOCR : 再読み取り
+
+' 設定画面の画面遷移
+Settings --> CurrencySetting : 通貨設定
+Settings --> ShareSetting : 家族との共有設定
+Settings --> TaxSetting : 税金・保険の設定
+Settings --> BackupSetting : バックアップ設定
+Settings --> NotificationSetting : 通知設定
+Settings --> UserProfile : ユーザープロフィール
+Settings --> About : アプリについて
+
+' 設定詳細画面の画面遷移
+CurrencySetting --> Settings : 設定完了
+ShareSetting --> FamilyInvite : 家族招待
+ShareSetting --> Settings : 設定完了
+FamilyInvite --> ShareSetting : 招待完了
+TaxSetting --> Settings : 設定完了
+BackupSetting --> Settings : 設定完了
+NotificationSetting --> Settings : 設定完了
+UserProfile --> Settings : プロフィール更新完了
+About --> Settings : 戻る
+
+' 共通の戻る遷移
+MonthlySummary --> Home : 戻る
+AddExpense --> Home : キャンセル
+Graph --> Home : 戻る
+CalendarView --> Home : 戻る
+ReceiptOCR --> Home : キャンセル
+Settings --> Home : 戻る
+ExpenseList --> Home : 戻る
+IncomeManagement --> Home : 戻る
+
+@enduml
