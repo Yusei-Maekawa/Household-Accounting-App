@@ -187,7 +187,7 @@ Household-Accounting-App/
 - [x] **React環境構築** (react-sample-app)
 - [ ] Django プロジェクト初期化
 - [ ] React→PWA対応実装
-- [ ] Docker 環境構築
+- [×] Docker 環境構築
 
 ### Phase 2: 既存環境活用・機能拡張
 - [ ] **react-sample-app**をベースに家計簿UI実装
